@@ -1,5 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <GL/glut.h>
+
+#include "pontos.h"
 
 /*
 ###################################################
@@ -17,7 +20,6 @@ Objetivos:
 	
 	n. ????? (Rotacionar e alinhar)
 	n + 1. Como facilitar a vida do usuário?
-
 */
 
 void draw(){
@@ -37,10 +39,22 @@ void keyboard(unsigned char key, int x, int y){
 	printf("keyboard(%c, %d, %d)\n", key, x, y);
 }
 
+struct listaDePontos *p = NULL;
+
 void initScene(){
 	glMatrixMode(GL_PROJECTION);
 	glOrtho(-10, 10, -10, 10, -10, 10);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
+
+	int pontos, i;
+	if(scanf("%d", &pontos)){
+		for(i = 0; i < pontos; i++){
+			float x, y, z;
+			scanf("%f %f %f", &x, &y, &z);
+			inserirPonto(&p, x, y, z);
+		}
+		printf("%d\n", sizeListaDePontos(p));		
+	}
 }
 
 int main(int argc, char **argv){
@@ -51,7 +65,7 @@ int main(int argc, char **argv){
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-	glutCreateWindow("Hello, world!");
+	glutCreateWindow("PLY Reader!");
 	glutDisplayFunc(draw);
 	glutKeyboardFunc(keyboard);
 	glutMouseFunc(mouse);

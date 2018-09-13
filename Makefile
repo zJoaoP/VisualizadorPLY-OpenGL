@@ -2,7 +2,7 @@ LIBS=-lglut -lGLU -lGL -lm
 EXEC=cg1
 CC=gcc
 
-all: main.o
+all: main.o pontos.o
 # @echo "Compilando programa principal: \""$(EXEC)\" #
 	@$(CC) -o $(EXEC) $^ $(LIBS)
 
