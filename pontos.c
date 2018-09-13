@@ -21,10 +21,11 @@ void freeListaDePontos(struct listaDePontos **l){
 void inserirPonto(struct listaDePontos **l, float x, float y, float z){
 	if(*l == NULL)
 		*l = initListaDePontos(x, y, z);
-	else if((*l)->next == NULL)
-		(*l)->next = initListaDePontos(x, y, z);
-	else
-		inserirPonto(&((*l)->next), x, y, z);
+	else{
+		struct listaDePontos *aux = initListaDePontos(x, y, z);
+		aux->next = *l;
+		*l = aux;
+	}
 }
 
 int sizeListaDePontos(struct listaDePontos *l){

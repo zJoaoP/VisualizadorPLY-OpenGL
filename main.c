@@ -21,12 +21,26 @@ Objetivos:
 	n. ????? (Rotacionar e alinhar)
 	n + 1. Como facilitar a vida do usuário?
 */
+struct listaDePontos *p = NULL;
+
+float angulo_x = 0, angulo_y = 0;
 
 void draw(){
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	//Draw here!
+	struct listaDePontos *aux = p;
+	int c = 1;
+	while(aux != NULL){
+		// printf("Desenhando %d\n", c++);
+		glBegin(GL_POINTS);
+		glVertex3f(aux->x, aux->y, aux->z);
+		glEnd();
 
+		aux = aux->next;
+	}
+
+	glRotatef(angulo_x, 1, 0, 0);
+	glRotatef(angulo_y, 0, 1, 0);
 	glFlush();
 }
 
@@ -36,14 +50,24 @@ void mouse(int button, int state, int x, int y){
 }
 
 void keyboard(unsigned char key, int x, int y){
-	printf("keyboard(%c, %d, %d)\n", key, x, y);
+	switch(key){
+		case 'x':{
+			angulo_x += 0.1;
+			glutPostRedisplay();
+			break;
+		}
+		case 'y':{
+			angulo_y += 0.1;
+			glutPostRedisplay();
+			break;
+		}
+	}
 }
 
-struct listaDePontos *p = NULL;
 
 void initScene(){
 	glMatrixMode(GL_PROJECTION);
-	glOrtho(-10, 10, -10, 10, -10, 10);
+	glOrtho(-0.5, 0.5, -0.5, 0.5, -0.5, 0.5);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 
 	int pontos, i;
@@ -53,7 +77,7 @@ void initScene(){
 			scanf("%f %f %f", &x, &y, &z);
 			inserirPonto(&p, x, y, z);
 		}
-		printf("%d\n", sizeListaDePontos(p));		
+		printf("Pontos lidos: %d\n", sizeListaDePontos(p));		
 	}
 }
 
