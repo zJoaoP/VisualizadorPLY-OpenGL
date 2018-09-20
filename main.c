@@ -21,6 +21,9 @@ Objetivos:
 	
 	n. ????? (Rotacionar e alinhar)
 	n + 1. Como facilitar a vida do usuário?
+
+Observações:
+	REMOVER A FLAG QUE IMPEDE O COLAPSO DA PILHA!!
 */
 
 float angulo_x = 0, angulo_y = 0;
@@ -78,6 +81,7 @@ int main(int argc, char **argv){
 	else{
 		int i = 0;
 		while(i < argc - 1){
+			models[i] = NULL;
 			initModel(argv[i + 1], i);
 			i++;
 		}
