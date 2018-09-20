@@ -2,15 +2,16 @@
 #include <stdlib.h>
 #include <GL/glut.h>
 
-#include "pontos.h"
+#define MODEL_COUNT 2
 
+#include "plyreader.h"
 /*
 ###################################################
 	Universidade Federal da Bahia
 	Departamento de Ciência da Computação
 	MATA65 - Computação Gráfica (2018.2)
 	Aluno: João Pedro Brito Silva
-	Atividade: Trabalho prático 1
+	Atividade: Trabalho Prático 1
 ###################################################
 Objetivos:
 	1. Desenvolver um parser para arquivos .PLY
@@ -21,23 +22,11 @@ Objetivos:
 	n. ????? (Rotacionar e alinhar)
 	n + 1. Como facilitar a vida do usuário?
 */
-struct listaDePontos *p = NULL;
 
 float angulo_x = 0, angulo_y = 0;
 
 void draw(){
 	glClear(GL_COLOR_BUFFER_BIT);
-
-	struct listaDePontos *aux = p;
-	int c = 1;
-	while(aux != NULL){
-		// printf("Desenhando %d\n", c++);
-		glBegin(GL_POINTS);
-		glVertex3f(aux->x, aux->y, aux->z);
-		glEnd();
-
-		aux = aux->next;
-	}
 
 	glRotatef(angulo_x, 1, 0, 0);
 	glRotatef(angulo_y, 0, 1, 0);
@@ -64,28 +53,35 @@ void keyboard(unsigned char key, int x, int y){
 	}
 }
 
+PLY* models[MODEL_COUNT];
 
 void initScene(){
 	glMatrixMode(GL_PROJECTION);
 	glOrtho(-0.5, 0.5, -0.5, 0.5, -0.5, 0.5);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
+}
 
-	int pontos, i;
-	if(scanf("%d", &pontos)){
-		for(i = 0; i < pontos; i++){
-			float x, y, z;
-			scanf("%f %f %f", &x, &y, &z);
-			inserirPonto(&p, x, y, z);
-		}
-		printf("Pontos lidos: %d\n", sizeListaDePontos(p));		
-	}
+void initModel(char *fileName, int position){
+	models[position] = openPLY(fileName);
 }
 
 int main(int argc, char **argv){
-	// if(argc < 3 || argc > 5){
-	// 	printf("Uso correto: %s [arquivo1.ply] [arquivo2.ply]\n", argv[0]);
-	// 	return 1;
-	// }
+	if(argc != MODEL_COUNT + 1){
+		int i;
+		printf("Uso correto: %s", argv[0]);
+		for(i = 0; i < MODEL_COUNT; i++)
+			printf(" [arquivo%d.PLY]", i + 1);
+
+		printf("\n");
+		return 1;
+	}
+	else{
+		int i = 0;
+		while(i < argc - 1){
+			initModel(argv[i + 1], i);
+			i++;
+		}
+	}
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
