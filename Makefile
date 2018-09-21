@@ -1,4 +1,4 @@
-FLAGS=-O4 -fno-stack-protector
+FLAGS=-O4
 LIBS=-lglut -lGLU -lGL -lm
 EXEC=cg1
 CC=gcc

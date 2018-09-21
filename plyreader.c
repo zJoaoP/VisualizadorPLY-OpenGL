@@ -10,10 +10,13 @@ PLY *openPLY(char *fileName){
 	if(myModel == NULL)
 		return NULL;
 
-	FILE *file = fopen(fileName, "rw+");
-	char param[11], type[7];
+	char *param = malloc(sizeof(char) * 12), *type = malloc(sizeof(char) * 7);
 	int count, i;
+	if(param == NULL || type == NULL)
+		return NULL;
+	
 
+	FILE *file = fopen(fileName, "rw+");
 	strcpy(myModel->fileName, fileName);
 	while(fscanf(file, "%s", param) == 1){
 		if(!strcmp(param, "end_header"))
@@ -28,25 +31,31 @@ PLY *openPLY(char *fileName){
 		else
 			continue;
 	}
+	free(param);
+	free(type);
 	
-	myModel->vertex = (GLfloat*) malloc(myModel->vertexCount * 3);
-	myModel->faces = (GLubyte*) malloc(myModel->faceCount * 3);
+	myModel->vertex = (GLfloat*) malloc(sizeof(GLfloat) * (myModel->vertexCount * 3));
+	myModel->faces = (GLubyte*) malloc(sizeof(GLubyte) * (myModel->faceCount * 3));
 
 	if(myModel->vertex == NULL || myModel->faces == NULL)
 		return NULL;
 
 	float a, b, c;
 	for(i = 0; i < myModel->vertexCount; i += 3){
-		fscanf(file, "%f %f %f", &a, &b, &c);
+		int x = fscanf(file, "%f %f %f", &a, &b, &c);
 
 		myModel->vertex[i] = a;
 		myModel->vertex[i + 1] = b;
 		myModel->vertex[i + 2] = c;
-		printf("%d (%d)\n", i, myModel->vertexCount);
+		printf("Posição = %d (Tamanho = %d)\n", i, myModel->vertexCount);
 	}
-	// for(i = 0; i < myModel->faceCount; i++){
-
-	// }
+	for(i = 0; i < myModel->faceCount; i += 3){
+		int q, x, y, z;
+		q = fscanf(file, "%d %d %d %d", &q, &x, &y, &z);
+		myModel->faces[i] = x;
+		myModel->faces[i + 1] = y;
+		myModel->faces[i + 2] = z;
+	}
 	fclose(file);
 	return myModel;
 }
