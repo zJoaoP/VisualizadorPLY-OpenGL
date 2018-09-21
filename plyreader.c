@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "plyreader.h"
 
@@ -35,31 +36,54 @@ PLY *openPLY(char *fileName){
 	free(type);
 	
 	myModel->vertex = (GLfloat*) malloc(sizeof(GLfloat) * (myModel->vertexCount * 3));
-	myModel->faces = (GLubyte*) malloc(sizeof(GLubyte) * (myModel->faceCount * 3));
+	myModel->faces = (GLuint*) malloc(sizeof(GLuint) * (myModel->faceCount * 3));
 
 	if(myModel->vertex == NULL || myModel->faces == NULL)
 		return NULL;
 
 	float a, b, c;
-	for(i = 0; i < myModel->vertexCount; i += 3){
-		int x = fscanf(file, "%f %f %f", &a, &b, &c);
-
-		myModel->vertex[i] = a;
-		myModel->vertex[i + 1] = b;
-		myModel->vertex[i + 2] = c;
-		printf("Posição = %d (Tamanho = %d)\n", i, myModel->vertexCount);
+	for(i = 0; i < myModel->vertexCount; i++){
+		fscanf(file, "%f %f %f", &a, &b, &c);
+		int pos = i * 3;
+		myModel->vertex[pos] = a;
+		myModel->vertex[pos + 1] = b;
+		myModel->vertex[pos + 2] = c;
 	}
-	for(i = 0; i < myModel->faceCount; i += 3){
-		int q, x, y, z;
-		q = fscanf(file, "%d %d %d %d", &q, &x, &y, &z);
-		myModel->faces[i] = x;
-		myModel->faces[i + 1] = y;
-		myModel->faces[i + 2] = z;
+	unsigned int q, x, y, z;
+	for(i = 0; i < myModel->faceCount; i++){
+		fscanf(file, "%u %u %u %u", &q, &x, &y, &z);
+		int pos = i * 3;
+		myModel->faces[pos] = x;
+		myModel->faces[pos + 1] = y;
+		myModel->faces[pos + 2] = z;
 	}
 	fclose(file);
+	myModel->color = generateRandomColor();
 	return myModel;
 }
 
-void drawPLY(PLY* model){
+void drawPLY(PLY* object){
+	// printf("Iniciando desenho de %s: %d vértices e %d faces.\n", object->fileName, object->vertexCount, object->faceCount);
+	Color *c = object->color;
+	glColor3f(c->red, c->green, c->blue);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+
+	glVertexPointer(3, GL_FLOAT, 0, object->vertex);
+	glDrawElements(GL_TRIANGLES, object->faceCount * 3, GL_UNSIGNED_INT, object->faces);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	// printf("Finalizando desenho de %s: %d vértices e %d faces.\n", object->fileName, object->vertexCount, object->faceCount);
 	return;
+}
+
+Color* generateRandomColor(){
+	Color *color = (Color*) malloc(sizeof(Color));
+	if(color == NULL)
+		return NULL;
+
+	color->red = (rand() % 101) / 100.0;
+	color->green = (rand() % 101) / 100.0;
+	color->blue = (rand() % 101) / 100.0;
+	return color;
 }
