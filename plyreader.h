@@ -14,8 +14,9 @@ typedef struct PLY{
 	Color* color;
 } PLY;
 
-void drawPLY(PLY* object);
 void changeColor(PLY** object, float r, float g, float b);
+void drawPLY(PLY* object);
+
 PLY* openPLY(char *filename);
 
 #endif

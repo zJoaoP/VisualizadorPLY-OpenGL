@@ -15,20 +15,26 @@
 	Aluno: João Pedro Brito Silva
 	Atividade: Trabalho Prático 1
 ###################################################
+
 Objetivos:
 	1. Desenvolver uma forma simples de alterar a malha selecionada.
-		(Adaptável para o mouse.)
+		(Adaptável para o mouse.) OK!
 	2. Desenvolver um sistema de rotação.
 	3. Desenvolver um sistema de translação.
-	4. Definir cores Default para as duas malhas.
-		(Devo pintar a malha selecionada de uma cor diferente?)
+	4. Desenvolver um sistema de escala.
 */
+
 PLY* objects[MODEL_COUNT];
-int current = 0;
+int current = 0, mouse_x = -1, mouse_y = -1;
+char operation = 'r';
 
 void changeSelection(int previous, int current){
 	changeColor(&(objects[previous]), 1.0, 1.0, 1.0); //Alterando a cor para branco.
 	changeColor(&(objects[current]), 1.0, 0.0, 0.0); //Alterando a cor para vermelho.	
+}
+
+void performRotation(int current, int variationX, int variationY){
+	printf("Performing rotation!!\n"); //O que fazer aqui??
 }
 
 void draw(){
@@ -46,13 +52,19 @@ void draw(){
 }
 
 void mouse(int button, int state, int x, int y){
-	if(!state)
-		printf("mouse(%d, %d, %d, %d) pressed.\n", button, state, x, y);
+	if(state == GLUT_DOWN){
+		mouse_x = x;
+		mouse_y = y;
+	}
+	else if(state == GLUT_UP){
+		if(operation == 'r')
+			performRotation(current, x - mouse_x, y - mouse_y);
+	}
 }
 
 void keyboard(unsigned char key, int x, int y){
 	switch(key){
-		case 's':{
+		case 's':{ //Provisório.
 			int previous = current;
 			current = current + 1;
 			if(current == MODEL_COUNT)
@@ -85,7 +97,7 @@ void keyboard(unsigned char key, int x, int y){
 
 void initScene(){
 	glMatrixMode(GL_PROJECTION);
-	glOrtho(-0.25, 0.25, -0.25, 0.25, -0.25, 0.25);
+	glOrtho(-0.25, 0.25, -0.15, 0.35, -0.25, 0.25);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 }
 
@@ -108,8 +120,9 @@ int main(int argc, char **argv){
 		int i = 0;
 		while(i < argc - 1){
 			initObject(argv[i + 1], i);
-			if(i == 0)
+			if(i == current)
 				changeColor(&(objects[0]), 1.0, 0.0, 0.0);
+
 			i++;
 		}
 	}

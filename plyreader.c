@@ -46,7 +46,6 @@ PLY *openPLY(char *fileName){
 	int pos;
 	for(i = 0, pos = 0; i < myModel->vertexCount; i++, pos += 3){
 		fscanf(file, "%f %f %f", &a, &b, &c);
-		// int pos = i * 3;
 		myModel->vertex[pos] = a;
 		myModel->vertex[pos + 1] = b;
 		myModel->vertex[pos + 2] = c;
@@ -54,7 +53,6 @@ PLY *openPLY(char *fileName){
 	unsigned int q, x, y, z;
 	for(i = 0, pos = 0; i < myModel->faceCount; i++, pos += 3){
 		fscanf(file, "%u %u %u %u", &q, &x, &y, &z);
-		// int pos = i * 3;
 		myModel->faces[pos] = x;
 		myModel->faces[pos + 1] = y;
 		myModel->faces[pos + 2] = z;
@@ -65,7 +63,6 @@ PLY *openPLY(char *fileName){
 }
 
 void drawPLY(PLY* object){
-	// printf("Iniciando desenho de %s: %d vértices e %d faces.\n", object->fileName, object->vertexCount, object->faceCount);
 	Color *c = object->color;
 	glColor3f(c->red, c->green, c->blue);
 
@@ -75,7 +72,6 @@ void drawPLY(PLY* object){
 	glDrawElements(GL_TRIANGLES, object->faceCount * 3, GL_UNSIGNED_INT, object->faces);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
-	// printf("Finalizando desenho de %s: %d vértices e %d faces.\n", object->fileName, object->vertexCount, object->faceCount);
 	return;
 }
 
