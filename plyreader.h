@@ -4,10 +4,7 @@
 #define MAX_FILE_NAME 34
 
 #include <GL/glut.h>
-
-typedef struct Color{
-	float red, green, blue;
-} Color;
+#include "color.h"
 
 typedef struct PLY{
 	char fileName[MAX_FILE_NAME];
@@ -17,8 +14,8 @@ typedef struct PLY{
 	Color* color;
 } PLY;
 
-PLY* openPLY(char *filename);
 void drawPLY(PLY* object);
-Color* generateRandomColor();
+void changeColor(PLY** object, float r, float g, float b);
+PLY* openPLY(char *filename);
 
 #endif

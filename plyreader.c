@@ -5,6 +5,7 @@
 #include <time.h>
 
 #include "plyreader.h"
+#include "color.h"
 
 PLY *openPLY(char *fileName){
 	PLY* myModel = (PLY*) malloc(sizeof(PLY));
@@ -42,23 +43,24 @@ PLY *openPLY(char *fileName){
 		return NULL;
 
 	float a, b, c;
-	for(i = 0; i < myModel->vertexCount; i++){
+	int pos;
+	for(i = 0, pos = 0; i < myModel->vertexCount; i++, pos += 3){
 		fscanf(file, "%f %f %f", &a, &b, &c);
-		int pos = i * 3;
+		// int pos = i * 3;
 		myModel->vertex[pos] = a;
 		myModel->vertex[pos + 1] = b;
 		myModel->vertex[pos + 2] = c;
 	}
 	unsigned int q, x, y, z;
-	for(i = 0; i < myModel->faceCount; i++){
+	for(i = 0, pos = 0; i < myModel->faceCount; i++, pos += 3){
 		fscanf(file, "%u %u %u %u", &q, &x, &y, &z);
-		int pos = i * 3;
+		// int pos = i * 3;
 		myModel->faces[pos] = x;
 		myModel->faces[pos + 1] = y;
 		myModel->faces[pos + 2] = z;
 	}
 	fclose(file);
-	myModel->color = generateRandomColor();
+	myModel->color = generateColor(1.0, 1.0, 1.0);
 	return myModel;
 }
 
@@ -77,13 +79,10 @@ void drawPLY(PLY* object){
 	return;
 }
 
-Color* generateRandomColor(){
-	Color *color = (Color*) malloc(sizeof(Color));
-	if(color == NULL)
-		return NULL;
-
-	color->red = (rand() % 101) / 100.0;
-	color->green = (rand() % 101) / 100.0;
-	color->blue = (rand() % 101) / 100.0;
-	return color;
+void changeColor(PLY** object, float r, float g, float b){
+	Color *c = (*object)->color;
+	
+	c->red = r;
+	c->green = g;
+	c->blue = b;
 }

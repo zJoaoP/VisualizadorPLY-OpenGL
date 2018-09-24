@@ -3,9 +3,10 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "plyreader.h"
+
 #define MODEL_COUNT 2
 
-#include "plyreader.h"
 /*
 ###################################################
 	Universidade Federal da Bahia
@@ -15,34 +16,32 @@
 	Atividade: Trabalho Prático 1
 ###################################################
 Objetivos:
-	1. Desenvolver um parser para arquivos .PLY
-	2. Exibir um objecto importado via arquivo .PLY (Observar a meta 1) na tela. (Malha de triângulos)
-	3. Como saber em qual malha cliquei, dado que um clique na tela retorna apenas uma posição 2D?
-		(A posição atual da câmera pode ajudar nisso.)
-	
-	n. ????? (Rotacionar e alinhar)
-	n + 1. Como facilitar a vida do usuário?
+	1. Desenvolver uma forma simples de alterar a malha selecionada.
+		(Adaptável para o mouse.)
+	2. Desenvolver um sistema de rotação.
+	3. Desenvolver um sistema de translação.
+	4. Definir cores Default para as duas malhas.
+		(Devo pintar a malha selecionada de uma cor diferente?)
 */
-
-float angulo_x = 0, angulo_y = 0, angulo_z = 0;
 PLY* objects[MODEL_COUNT];
+int current = 0;
+
+void changeSelection(int previous, int current){
+	changeColor(&(objects[previous]), 1.0, 1.0, 1.0); //Alterando a cor para branco.
+	changeColor(&(objects[current]), 1.0, 0.0, 0.0); //Alterando a cor para vermelho.	
+}
 
 void draw(){
 	glClear(GL_COLOR_BUFFER_BIT);
-	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	
 	int i;
 	for(i = 0; i < MODEL_COUNT; i++)
 		drawPLY(objects[i]);
 
-	glRotatef(angulo_x, 1, 0, 0);
-	glRotatef(angulo_y, 0, 1, 0);
-	glRotatef(angulo_z, 0, 0, 1);
-
 	GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        printf("OpenGL Error: %d\n", err);
-    }
+    while ((err = glGetError()) != GL_NO_ERROR)
+    	printf("OpenGL Error: %d\n", err);
+	
 	glFlush();
 }
 
@@ -53,22 +52,34 @@ void mouse(int button, int state, int x, int y){
 
 void keyboard(unsigned char key, int x, int y){
 	switch(key){
-		case 'x':{
-			angulo_x += 0.1;
-			glutPostRedisplay();
-			break;
-		}
-		case 'y':{
-			angulo_y += 0.1;
-			glutPostRedisplay();
-			break;
-		}
-		case 'z':{
-			angulo_z += 0.1;
+		case 's':{
+			int previous = current;
+			current = current + 1;
+			if(current == MODEL_COUNT)
+				current = 0;
+
+			changeSelection(previous, current);
 			glutPostRedisplay();
 			break;
 		}
 	}
+	// switch(key){
+	// 	case 'x':{
+	// 		angulo_x += 0.1;
+	// 		glutPostRedisplay();
+	// 		break;
+	// 	}
+	// 	case 'y':{
+	// 		angulo_y += 0.1;
+	// 		glutPostRedisplay();
+	// 		break;
+	// 	}
+	// 	case 'z':{
+	// 		angulo_z += 0.1;
+	// 		glutPostRedisplay();
+	// 		break;
+	// 	}
+	// }
 }
 
 
@@ -96,15 +107,16 @@ int main(int argc, char **argv){
 	else{
 		int i = 0;
 		while(i < argc - 1){
-			objects[i] = NULL;
 			initObject(argv[i + 1], i);
+			if(i == 0)
+				changeColor(&(objects[0]), 1.0, 0.0, 0.0);
 			i++;
 		}
 	}
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-	glutCreateWindow("PLY Reader!");
+	glutCreateWindow("Computação Gráfica 2018.2 (T1)");
 	glutDisplayFunc(draw);
 	glutKeyboardFunc(keyboard);
 	glutMouseFunc(mouse);
