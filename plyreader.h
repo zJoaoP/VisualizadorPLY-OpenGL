@@ -16,9 +16,9 @@ typedef struct PLY{
 	GLfloat angleX, angleY; //Ângulo das rotações.
 } PLY;
 
+void performRotationPLY(PLY** object, int dx, int dy);
 void changeColorPLY(PLY** object, float r, float g, float b);
 void drawPLY(PLY* object);
-void performRotationPLY(PLY** object, int dx, int dy);
 
 PLY* openPLY(char *filename);
 
