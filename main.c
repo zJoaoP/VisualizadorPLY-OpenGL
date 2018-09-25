@@ -19,22 +19,27 @@
 Objetivos:
 	1. Desenvolver uma forma simples de alterar a malha selecionada.
 		(Adaptável para o mouse.) OK!
-	2. Desenvolver um sistema de rotação.
+	2. Desenvolver um sistema de rotação. (Quase pronto.)
 	3. Desenvolver um sistema de translação.
 	4. Desenvolver um sistema de escala.
 */
 
 PLY* objects[MODEL_COUNT];
-int current = 0, mouse_x = -1, mouse_y = -1;
+
+int current = 0;
+int currentX = 0, currentY = 0, dx = 0, dy = 0;
+int isLeftButtonPressed = 0;
+
 char operation = 'r';
 
 void changeSelection(int previous, int current){
-	changeColor(&(objects[previous]), 1.0, 1.0, 1.0); //Alterando a cor para branco.
-	changeColor(&(objects[current]), 1.0, 0.0, 0.0); //Alterando a cor para vermelho.	
+	changeColorPLY(&(objects[previous]), 1.0, 1.0, 1.0); //Alterando a cor para branco.
+	changeColorPLY(&(objects[current]), 1.0, 0.0, 0.0); //Alterando a cor para vermelho.	
 }
 
-void performRotation(int current, int variationX, int variationY){
-	printf("Performing rotation!!\n"); //O que fazer aqui??
+void performRotation(int id, int dx, int dy){
+	performRotationPLY(&(objects[id]), dx, dy);
+	glutPostRedisplay();
 }
 
 void draw(){
@@ -45,26 +50,45 @@ void draw(){
 		drawPLY(objects[i]);
 
 	GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR)
-    	printf("OpenGL Error: %d\n", err);
+	while ((err = glGetError()) != GL_NO_ERROR)
+		printf("OpenGL Error: %d\n", err);
 	
 	glFlush();
 }
 
 void mouse(int button, int state, int x, int y){
-	if(state == GLUT_DOWN){
-		mouse_x = x;
-		mouse_y = y;
+	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
+		isLeftButtonPressed = 1;
+
+		//Inicializando o vetor de movimentação.
+		currentX = x;
+		currentY = y;
+		dx = 0; //Deslocamento inicial igualado a 0.
+		dy = 0;
 	}
-	else if(state == GLUT_UP){
-		if(operation == 'r')
-			performRotation(current, x - mouse_x, y - mouse_y);
+	else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
+		isLeftButtonPressed = 0; //Utilizar isso em "MouseMotion".
+}
+
+void mouseMotion(int x, int y){
+	if(isLeftButtonPressed){
+		//Atualizando o vetor de movimentação, independente do caso.
+		dx = x - currentX;
+		dy = y - currentY;
+		currentX = x;
+		currentY = y;
+		switch(operation){
+			case 'r':{ //Rotation.
+				performRotation(current, dx, dy);
+				break;
+			}
+		}
 	}
 }
 
 void keyboard(unsigned char key, int x, int y){
 	switch(key){
-		case 's':{ //Provisório.
+		case 's':{ //Provisório. Alterar mais tarde.
 			int previous = current;
 			current = current + 1;
 			if(current == MODEL_COUNT)
@@ -75,29 +99,13 @@ void keyboard(unsigned char key, int x, int y){
 			break;
 		}
 	}
-	// switch(key){
-	// 	case 'x':{
-	// 		angulo_x += 0.1;
-	// 		glutPostRedisplay();
-	// 		break;
-	// 	}
-	// 	case 'y':{
-	// 		angulo_y += 0.1;
-	// 		glutPostRedisplay();
-	// 		break;
-	// 	}
-	// 	case 'z':{
-	// 		angulo_z += 0.1;
-	// 		glutPostRedisplay();
-	// 		break;
-	// 	}
-	// }
 }
 
 
 void initScene(){
 	glMatrixMode(GL_PROJECTION);
 	glOrtho(-0.25, 0.25, -0.15, 0.35, -0.25, 0.25);
+	// glOrtho(-1, 1, -1, 1, -1, 1);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 }
 
@@ -121,7 +129,7 @@ int main(int argc, char **argv){
 		while(i < argc - 1){
 			initObject(argv[i + 1], i);
 			if(i == current)
-				changeColor(&(objects[0]), 1.0, 0.0, 0.0);
+				changeColorPLY(&(objects[0]), 1.0, 0.0, 0.0);
 
 			i++;
 		}
@@ -129,10 +137,11 @@ int main(int argc, char **argv){
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-	glutCreateWindow("Computação Gráfica 2018.2 (T1)");
+	glutCreateWindow("CG 2018.2");
 	glutDisplayFunc(draw);
 	glutKeyboardFunc(keyboard);
 	glutMouseFunc(mouse);
+	glutMotionFunc(mouseMotion);
 
 	initScene();
 

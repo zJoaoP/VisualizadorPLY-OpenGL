@@ -58,24 +58,40 @@ PLY *openPLY(char *fileName){
 		myModel->faces[pos + 2] = z;
 	}
 	fclose(file);
+
 	myModel->color = generateColor(1.0, 1.0, 1.0);
+	myModel->angleX = 0;
+	myModel->angleY = 0;
 	return myModel;
+}
+
+void performRotationPLY(PLY** object, int dx, int dy){
+	(*object)->angleX += dx;
+	(*object)->angleY += dy;
 }
 
 void drawPLY(PLY* object){
 	Color *c = object->color;
+
 	glColor3f(c->red, c->green, c->blue);
 
+	glPushMatrix();
+	
+	glRotatef((GLfloat) object->angleX, 1.0, 0.0, 0.0);
+	glRotatef((GLfloat) object->angleY, 0.0, 1.0, 0.0);
+	
 	glEnableClientState(GL_VERTEX_ARRAY);
 
 	glVertexPointer(3, GL_FLOAT, 0, object->vertex);
 	glDrawElements(GL_TRIANGLES, object->faceCount * 3, GL_UNSIGNED_INT, object->faces);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
+
+	glPopMatrix();
 	return;
 }
 
-void changeColor(PLY** object, float r, float g, float b){
+void changeColorPLY(PLY** object, float r, float g, float b){
 	Color *c = (*object)->color;
 	
 	c->red = r;
