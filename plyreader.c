@@ -43,7 +43,7 @@ PLY *openPLY(char *fileName){
 	if(myModel->vertex == NULL || myModel->faces == NULL)
 		return NULL;
 
-	float minX = INF, maxX = -INF, minY = INF, maxY = -INF, minZ = INF, maxZ = -INF;
+	float sumX = 0.0, sumY = 0.0, sumZ = 0.0;
 	float x, y, z;
 	int pos;
 	for(i = 0, pos = 0; i < myModel->vertexCount; i++, pos += 3){
@@ -52,12 +52,9 @@ PLY *openPLY(char *fileName){
 		myModel->vertex[pos + 1] = y;
 		myModel->vertex[pos + 2] = z;
 
-		if(x < minX) minX = x;
-		if(x > maxX) maxX = x;
-		if(y < minY) minY = y;
-		if(y > maxY) maxY = y;
-		if(z < minZ) minZ = z;
-		if(z > maxZ) maxZ = z;
+		sumX += x;
+		sumY += y;
+		sumZ += z;
 	}
 	unsigned int q, a, b, c;
 	for(i = 0, pos = 0; i < myModel->faceCount; i++, pos += 3){
@@ -73,9 +70,9 @@ PLY *openPLY(char *fileName){
 	myModel->angleX = 0;
 	myModel->angleY = 0;
 
-	myModel->center[0] = (maxX + minX)/2.0;
-	myModel->center[1] = (maxY + minY)/2.0;
-	myModel->center[2] = (maxZ + minZ)/2.0;
+	myModel->center[0] = sumX / myModel->vertexCount;
+	myModel->center[1] = sumY / myModel->vertexCount;
+	myModel->center[2] = sumZ / myModel->vertexCount;
 	return myModel;
 }
 
@@ -85,15 +82,16 @@ void performRotationPLY(PLY** object, int dx, int dy){
 }
 
 void drawPLY(PLY* object){
-	printf("Center = (%f, %f, %f)\n", object->center[0], object->center[1], object->center[2]);
 	glColor3f(object->color[0], object->color[1], object->color[2]);
 
 	glPushMatrix();
-	glTranslatef(-object->center[0], -object->center[1], -object->center[2]);
+	
+	glTranslatef(object->center[0], object->center[1], object->center[2]);
 
 	glRotatef((GLfloat) object->angleX, 1.0, 0.0, 0.0);
-	glRotatef((GLfloat) object->angleY, 0.0, 1.0, 0.0);
-
+	// glRotatef((GLfloat) object->angleY, 0.0, 1.0, 0.0);
+	
+	glTranslatef(-object->center[0], -object->center[1], -object->center[2]);
 	
 	glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -102,7 +100,6 @@ void drawPLY(PLY* object){
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 
-	glTranslatef(object->center[0], object->center[1], object->center[2]);
 	glPopMatrix();
 	return;
 }

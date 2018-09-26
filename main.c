@@ -79,6 +79,7 @@ void mouseMotion(int x, int y){
 		currentY = y;
 		switch(operation){
 			case 'r':{ //Rotation.
+				printf("Rotação (dx, dy) = (%d, %d) | (x, y) = (%d, %d)\n", dx, dy, x, y);
 				performRotation(current, dx, dy);
 				break;
 			}
@@ -101,11 +102,9 @@ void keyboard(unsigned char key, int x, int y){
 	}
 }
 
-
 void initScene(){
 	glMatrixMode(GL_PROJECTION);
-	// glOrtho(-0.25, 0.25, -0.15, 0.35, -0.25, 0.25);
-	// glOrtho(-1, 1, -1, 1, -1, 1);
+	glOrtho(-0.25, 0.25, -0.15, 0.35, -0.25, 0.25);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 }
 
