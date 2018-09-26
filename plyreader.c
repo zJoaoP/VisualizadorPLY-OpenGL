@@ -5,7 +5,8 @@
 #include <time.h>
 
 #include "plyreader.h"
-#include "color.h"
+
+#define INF (1 << 30)
 
 PLY *openPLY(char *fileName){
 	PLY* myModel = (PLY*) malloc(sizeof(PLY));
@@ -42,26 +43,39 @@ PLY *openPLY(char *fileName){
 	if(myModel->vertex == NULL || myModel->faces == NULL)
 		return NULL;
 
-	float a, b, c;
+	float minX = INF, maxX = -INF, minY = INF, maxY = -INF, minZ = INF, maxZ = -INF;
+	float x, y, z;
 	int pos;
 	for(i = 0, pos = 0; i < myModel->vertexCount; i++, pos += 3){
-		fscanf(file, "%f %f %f", &a, &b, &c);
-		myModel->vertex[pos] = a;
-		myModel->vertex[pos + 1] = b;
-		myModel->vertex[pos + 2] = c;
+		fscanf(file, "%f %f %f", &x, &y, &z);
+		myModel->vertex[pos] = x;
+		myModel->vertex[pos + 1] = y;
+		myModel->vertex[pos + 2] = z;
+
+		if(x < minX) minX = x;
+		if(x > maxX) maxX = x;
+		if(y < minY) minY = y;
+		if(y > maxY) maxY = y;
+		if(z < minZ) minZ = z;
+		if(z > maxZ) maxZ = z;
 	}
-	unsigned int q, x, y, z;
+	unsigned int q, a, b, c;
 	for(i = 0, pos = 0; i < myModel->faceCount; i++, pos += 3){
-		fscanf(file, "%u %u %u %u", &q, &x, &y, &z);
-		myModel->faces[pos] = x;
-		myModel->faces[pos + 1] = y;
-		myModel->faces[pos + 2] = z;
+		fscanf(file, "%u %u %u %u", &q, &a, &b, &c);
+		myModel->faces[pos] = a;
+		myModel->faces[pos + 1] = b;
+		myModel->faces[pos + 2] = c;
 	}
 	fclose(file);
 
-	myModel->color = generateColor(1.0, 1.0, 1.0);
+	myModel->color[0] = myModel->color[1] = myModel->color[2] = 1.0;
+	
 	myModel->angleX = 0;
 	myModel->angleY = 0;
+
+	myModel->center[0] = (maxX + minX)/2.0;
+	myModel->center[1] = (maxY + minY)/2.0;
+	myModel->center[2] = (maxZ + minZ)/2.0;
 	return myModel;
 }
 
@@ -71,14 +85,15 @@ void performRotationPLY(PLY** object, int dx, int dy){
 }
 
 void drawPLY(PLY* object){
-	Color *c = object->color;
-
-	glColor3f(c->red, c->green, c->blue);
+	printf("Center = (%f, %f, %f)\n", object->center[0], object->center[1], object->center[2]);
+	glColor3f(object->color[0], object->color[1], object->color[2]);
 
 	glPushMatrix();
-	
+	glTranslatef(-object->center[0], -object->center[1], -object->center[2]);
+
 	glRotatef((GLfloat) object->angleX, 1.0, 0.0, 0.0);
 	glRotatef((GLfloat) object->angleY, 0.0, 1.0, 0.0);
+
 	
 	glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -87,14 +102,13 @@ void drawPLY(PLY* object){
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 
+	glTranslatef(object->center[0], object->center[1], object->center[2]);
 	glPopMatrix();
 	return;
 }
 
 void changeColorPLY(PLY** object, float r, float g, float b){
-	Color *c = (*object)->color;
-	
-	c->red = r;
-	c->green = g;
-	c->blue = b;
+	(*object)->color[0] = r;	
+	(*object)->color[1] = g;
+	(*object)->color[2] = b;
 }

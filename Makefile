@@ -3,7 +3,7 @@ LIBS=-lglut -lGLU -lGL -lm
 EXEC=cg1
 CC=gcc
 
-all: main.o plyreader.o color.o
+all: main.o plyreader.o
 # @echo "Compilando programa principal: \""$(EXEC)\" #
 	$(CC) $(FLAGS) -o $(EXEC) $^ $(LIBS)
 

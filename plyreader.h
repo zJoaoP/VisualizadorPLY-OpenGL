@@ -4,15 +4,15 @@
 #define MAX_FILE_NAME 34
 
 #include <GL/glut.h>
-#include "color.h"
 
 typedef struct PLY{
 	char fileName[MAX_FILE_NAME];
 	int vertexCount, faceCount;
+	float center[3]; //Coordenadas aproximadas do centro.
+	float color[3]; //R G B
+	
 	GLfloat* vertex;
 	GLuint* faces;
-	Color* color;
-
 	GLfloat angleX, angleY; //Ângulo das rotações.
 } PLY;
 

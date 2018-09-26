@@ -104,7 +104,7 @@ void keyboard(unsigned char key, int x, int y){
 
 void initScene(){
 	glMatrixMode(GL_PROJECTION);
-	glOrtho(-0.25, 0.25, -0.15, 0.35, -0.25, 0.25);
+	// glOrtho(-0.25, 0.25, -0.15, 0.35, -0.25, 0.25);
 	// glOrtho(-1, 1, -1, 1, -1, 1);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 }
