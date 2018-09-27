@@ -1,7 +1,7 @@
 #include <GL/glut.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
+#include <math.h>
 
 #include "plyreader.h"
 
@@ -28,7 +28,10 @@ PLY* objects[MODEL_COUNT];
 
 int current = 0;
 int currentX = 0, currentY = 0, dx = 0, dy = 0;
+int isRightButtonPressed = 0;
 int isLeftButtonPressed = 0;
+
+float angleX = 0.0, angleY = 0.0, distance = 0.5;
 
 char operation = 'r';
 
@@ -44,7 +47,25 @@ void performRotation(int id, int dx, int dy){
 
 void draw(){
 	glClear(GL_COLOR_BUFFER_BIT);
-	
+
+	/*
+		eyeX = pickObjX + radius*cos(phi)*sin(theta);
+		eyeY = pickObjY + radius*sin(phi)*sin(theta);
+		eyeZ = pickObjZ + radius*cos(theta);
+	*/
+
+	float cameraX = distance * cos(angleY) * sin(angleX);
+	float cameraY = distance * sin(angleY) * sin(angleX);
+	float cameraZ = distance * cos(angleX);
+
+	printf("camera = (%f, %f, %f), (%f, %f)\n", cameraX, cameraY, cameraZ, angleX, angleY);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(angleY, 1, 0.1, 500);
+	gluLookAt(cameraX, cameraY, cameraZ, 0, 0, 0, 0, 1, 0);
+
+	glMatrixMode(GL_MODELVIEW);
 	int i;
 	for(i = 0; i < MODEL_COUNT; i++)
 		drawPLY(objects[i]);
@@ -52,7 +73,7 @@ void draw(){
 	GLenum err;
 	while ((err = glGetError()) != GL_NO_ERROR)
 		printf("OpenGL Error: %d\n", err);
-	
+
 	glFlush();
 }
 
@@ -68,6 +89,18 @@ void mouse(int button, int state, int x, int y){
 	}
 	else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
 		isLeftButtonPressed = 0; //Utilizar isso em "MouseMotion".
+	else if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+		isRightButtonPressed = 1;
+	else if(button == GLUT_RIGHT_BUTTON && state == GLUT_UP)
+		isRightButtonPressed = 0;
+	else if(button == 3){
+		distance += 0.05;
+		glutPostRedisplay();
+	}
+	else if(button == 4){
+		distance -= 0.05;
+		glutPostRedisplay();
+	}
 }
 
 void mouseMotion(int x, int y){
@@ -83,6 +116,11 @@ void mouseMotion(int x, int y){
 				break;
 			}
 		}
+	}
+	else if(isRightButtonPressed){
+		angleX += dx * 0.001;
+		angleY += dy * 0.001;
+		glutPostRedisplay();
 	}
 }
 
@@ -102,7 +140,7 @@ void keyboard(unsigned char key, int x, int y){
 }
 
 void initScene(){
-	glMatrixMode(GL_PROJECTION);
+	glMatrixMode(GL_MODELVIEW);
 	glOrtho(-0.25, 0.25, -0.15, 0.35, -0.25, 0.25);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 }
@@ -112,7 +150,6 @@ void initObject(char *fileName, int position){
 }
 
 int main(int argc, char **argv){
-	srand(time(NULL));
 	if(argc != MODEL_COUNT + 1){
 		int i;
 		printf("Uso correto: %s", argv[0]);

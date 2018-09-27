@@ -85,6 +85,8 @@ void drawPLY(PLY* object){
 	glColor3f(object->color[0], object->color[1], object->color[2]);
 
 	glPushMatrix();
+
+	glLoadIdentity();
 	
 	glTranslatef(object->center[0], object->center[1], object->center[2]);
 
