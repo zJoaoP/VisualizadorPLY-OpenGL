@@ -79,7 +79,6 @@ void mouseMotion(int x, int y){
 		currentY = y;
 		switch(operation){
 			case 'r':{ //Rotation.
-				printf("Rotação (dx, dy) = (%d, %d) | (x, y) = (%d, %d)\n", dx, dy, x, y);
 				performRotation(current, dx, dy);
 				break;
 			}

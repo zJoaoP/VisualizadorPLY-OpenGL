@@ -77,8 +77,8 @@ PLY *openPLY(char *fileName){
 }
 
 void performRotationPLY(PLY** object, int dx, int dy){
-	(*object)->angleX += dx;
-	(*object)->angleY += dy;
+	(*object)->angleX += dy;
+	(*object)->angleY += dx;
 }
 
 void drawPLY(PLY* object){
@@ -89,7 +89,7 @@ void drawPLY(PLY* object){
 	glTranslatef(object->center[0], object->center[1], object->center[2]);
 
 	glRotatef((GLfloat) object->angleX, 1.0, 0.0, 0.0);
-	// glRotatef((GLfloat) object->angleY, 0.0, 1.0, 0.0);
+	glRotatef((GLfloat) object->angleY, 0.0, 1.0, 0.0);
 	
 	glTranslatef(-object->center[0], -object->center[1], -object->center[2]);
 	
