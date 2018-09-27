@@ -31,7 +31,7 @@ int currentX = 0, currentY = 0, dx = 0, dy = 0;
 int isRightButtonPressed = 0;
 int isLeftButtonPressed = 0;
 
-float angleX = 0.0, angleY = 0.0, distance = 0.5;
+float theta = 0.0, phi = 0.0, distance = 2.0;
 
 char operation = 'r';
 
@@ -54,15 +54,15 @@ void draw(){
 		eyeZ = pickObjZ + radius*cos(theta);
 	*/
 
-	float cameraX = distance * cos(angleY) * sin(angleX);
-	float cameraY = distance * sin(angleY) * sin(angleX);
-	float cameraZ = distance * cos(angleX);
+	float cameraX = distance * -sinf(theta*(M_PI/180)) * cosf((phi)*(M_PI/180));
+	float cameraY = distance * -sinf((phi)*(M_PI/180));
+	float cameraZ = -distance * cosf((theta)*(M_PI/180)) * cosf((phi)*(M_PI/180));
 
-	printf("camera = (%f, %f, %f), (%f, %f)\n", cameraX, cameraY, cameraZ, angleX, angleY);
+	printf("camera = (%f, %f, %f), (%f, %f)\n", cameraX, cameraY, cameraZ, theta, phi);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(angleY, 1, 0.1, 500);
+	gluPerspective(15.0f, 1, 0.1, 50);
 	gluLookAt(cameraX, cameraY, cameraZ, 0, 0, 0, 0, 1, 0);
 
 	glMatrixMode(GL_MODELVIEW);
@@ -78,15 +78,11 @@ void draw(){
 }
 
 void mouse(int button, int state, int x, int y){
-	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
-		isLeftButtonPressed = 1;
+	currentX = x, currentY = y;
+	dx = 0, dy = 0;
 
-		//Inicializando o vetor de movimentação.
-		currentX = x;
-		currentY = y;
-		dx = 0; //Deslocamento inicial igualado a 0.
-		dy = 0;
-	}
+	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+		isLeftButtonPressed = 1;
 	else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
 		isLeftButtonPressed = 0; //Utilizar isso em "MouseMotion".
 	else if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
@@ -104,12 +100,13 @@ void mouse(int button, int state, int x, int y){
 }
 
 void mouseMotion(int x, int y){
+	dx = x - currentX;
+	dy = y - currentY;
+	currentX = x;
+	currentY = y;
+
 	if(isLeftButtonPressed){
 		//Atualizando o vetor de movimentação, independente do caso.
-		dx = x - currentX;
-		dy = y - currentY;
-		currentX = x;
-		currentY = y;
 		switch(operation){
 			case 'r':{ //Rotation.
 				performRotation(current, dx, dy);
@@ -118,8 +115,8 @@ void mouseMotion(int x, int y){
 		}
 	}
 	else if(isRightButtonPressed){
-		angleX += dx * 0.001;
-		angleY += dy * 0.001;
+		theta += dx;
+		phi += dy;
 		glutPostRedisplay();
 	}
 }
