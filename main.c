@@ -28,11 +28,12 @@ PLY* objects[MODEL_COUNT];
 
 int current = 0;
 int currentX = 0, currentY = 0, dx = 0, dy = 0;
+int startX = 0.0, startY = 0.0;
 int isRightButtonPressed = 0;
 int isLeftButtonPressed = 0;
 
 float theta = 0.0, phi = 0.0, distance = 2.0;
-
+float ratio = 1.0;
 char operation = 'r';
 
 void changeSelection(int previous, int current){
@@ -41,28 +42,36 @@ void changeSelection(int previous, int current){
 }
 
 void performRotation(int id, int dx, int dy){
-	performRotationPLY(&(objects[id]), dx, dy);
+	performRotationPLY(&(objects[id]), -dx, dy);
+	glutPostRedisplay();
+}
+
+float getDistance(float xA, float yA, float xB, float yB){
+	return sqrt(pow(xA - xB, 2) + pow(yA - yB, 2));
+}
+
+void performScale(int id, int currentX, int currentY){
+	GLint m_viewport[4];
+	glGetIntegerv(GL_VIEWPORT, m_viewport);
+
+	int w = m_viewport[2], h = m_viewport[3];
+	float originalDistance = getDistance(w/2, h/2, startX, startY);
+	float currentDistance = getDistance(w/2, h/2, currentX, currentY);
+
+	performScalePLY(&(objects[id]), currentDistance / originalDistance);
 	glutPostRedisplay();
 }
 
 void draw(){
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	/*
-		eyeX = pickObjX + radius*cos(phi)*sin(theta);
-		eyeY = pickObjY + radius*sin(phi)*sin(theta);
-		eyeZ = pickObjZ + radius*cos(theta);
-	*/
-
 	float cameraX = distance * -sinf(theta*(M_PI/180)) * cosf((phi)*(M_PI/180));
 	float cameraY = distance * -sinf((phi)*(M_PI/180));
 	float cameraZ = -distance * cosf((theta)*(M_PI/180)) * cosf((phi)*(M_PI/180));
 
-	printf("camera = (%f, %f, %f), (%f, %f)\n", cameraX, cameraY, cameraZ, theta, phi);
-
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(15.0f, 1, 0.1, 50);
+	gluPerspective(10.0f, ratio, 0.1, 50);
 	gluLookAt(cameraX, cameraY, cameraZ, 0, 0, 0, 0, 1, 0);
 
 	glMatrixMode(GL_MODELVIEW);
@@ -81,8 +90,11 @@ void mouse(int button, int state, int x, int y){
 	currentX = x, currentY = y;
 	dx = 0, dy = 0;
 
-	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
 		isLeftButtonPressed = 1;
+		startX = x;
+		startY = y;
+	}
 	else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
 		isLeftButtonPressed = 0; //Utilizar isso em "MouseMotion".
 	else if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
@@ -112,6 +124,10 @@ void mouseMotion(int x, int y){
 				performRotation(current, dx, dy);
 				break;
 			}
+			case 's':{
+				performScale(current, currentX, currentY);
+				break;
+			}
 		}
 	}
 	else if(isRightButtonPressed){
@@ -123,7 +139,7 @@ void mouseMotion(int x, int y){
 
 void keyboard(unsigned char key, int x, int y){
 	switch(key){
-		case 's':{ //Provisório. Alterar mais tarde.
+		case 'q':{ //Provisório. Alterar mais tarde.
 			int previous = current;
 			current = current + 1;
 			if(current == MODEL_COUNT)
@@ -133,17 +149,31 @@ void keyboard(unsigned char key, int x, int y){
 			glutPostRedisplay();
 			break;
 		}
+		case 'r':
+		case 's':
+		case 't':{
+			operation = key;
+			break;
+		}
 	}
 }
 
 void initScene(){
 	glMatrixMode(GL_MODELVIEW);
-	glOrtho(-0.25, 0.25, -0.15, 0.35, -0.25, 0.25);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 }
 
 void initObject(char *fileName, int position){
 	objects[position] = openPLY(fileName);
+}
+
+void reshape(int w, int h){
+	ratio = (float) w / h;
+
+	glViewport(0, 0, (GLsizei) w, (GLsizei) h);
+	glLoadIdentity();
+	glOrtho(-10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+	glMatrixMode(GL_MODELVIEW);
 }
 
 int main(int argc, char **argv){
@@ -174,6 +204,7 @@ int main(int argc, char **argv){
 	glutKeyboardFunc(keyboard);
 	glutMouseFunc(mouse);
 	glutMotionFunc(mouseMotion);
+	glutReshapeFunc(reshape);
 
 	initScene();
 

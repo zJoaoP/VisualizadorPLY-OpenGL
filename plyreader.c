@@ -73,12 +73,18 @@ PLY *openPLY(char *fileName){
 	myModel->center[0] = sumX / myModel->vertexCount;
 	myModel->center[1] = sumY / myModel->vertexCount;
 	myModel->center[2] = sumZ / myModel->vertexCount;
+	myModel->scaleFactor = 1.0;
 	return myModel;
 }
 
 void performRotationPLY(PLY** object, int dx, int dy){
 	(*object)->angleX += dy;
 	(*object)->angleY += dx;
+}
+
+void performScalePLY(PLY** object, float scaleFactor){
+	printf("Scale Factor = %f\n", scaleFactor);
+	(*object)->scaleFactor = scaleFactor;
 }
 
 void drawPLY(PLY* object){
@@ -92,6 +98,7 @@ void drawPLY(PLY* object){
 
 	glRotatef((GLfloat) object->angleX, 1.0, 0.0, 0.0);
 	glRotatef((GLfloat) object->angleY, 0.0, 1.0, 0.0);
+	glScalef(object->scaleFactor, object->scaleFactor, object->scaleFactor);
 	
 	glTranslatef(-object->center[0], -object->center[1], -object->center[2]);
 	
