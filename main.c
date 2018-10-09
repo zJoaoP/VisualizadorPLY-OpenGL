@@ -17,11 +17,11 @@
 ###################################################
 
 Objetivos:
-	1. Desenvolver uma forma simples de alterar a malha selecionada.
-		(Adaptável para o mouse.) OK!
-	2. Desenvolver um sistema de rotação. (Quase pronto.)
-	3. Desenvolver um sistema de translação.
-	4. Desenvolver um sistema de escala.
+	1. Desenvolver um sistema de translação.
+	2. Selecionar com o mouse.
+	3. Mover todos os codigos para um só arquivo.
+
+http://professor.unisinos.br/ltonietto/jed/cgr/selection.pdf
 */
 
 PLY* objects[MODEL_COUNT];
