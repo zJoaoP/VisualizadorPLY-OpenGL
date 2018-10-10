@@ -36,9 +36,12 @@ float theta = 0.0, phi = 0.0, distance = 2.0;
 float ratio = 1.0;
 char operation = 'r';
 
-void changeSelection(int previous, int current){
-	changeColorPLY(&(objects[previous]), 1.0, 1.0, 1.0); //Alterando a cor para branco.
-	changeColorPLY(&(objects[current]), 1.0, 0.0, 0.0); //Alterando a cor para vermelho.	
+void changeSelection(int prev, int curr){
+	changeColorPLY(&(objects[prev]), 1.0, 1.0, 1.0); //Alterando a cor para branco.
+	changeColorPLY(&(objects[curr]), 1.0, 0.0, 0.0); //Alterando a cor para vermelho.	
+	current = curr;
+
+	glutPostRedisplay();
 }
 
 void performRotation(int id, int dx, int dy){
@@ -63,7 +66,8 @@ void performScale(int id, int currentX, int currentY){
 }
 
 void draw(){
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+	glClearStencil(0);
 
 	float cameraX = distance * -sinf(theta*(M_PI/180)) * cosf((phi)*(M_PI/180));
 	float cameraY = distance * -sinf((phi)*(M_PI/180));
@@ -75,15 +79,27 @@ void draw(){
 	gluLookAt(cameraX, cameraY, cameraZ, 0, 0, 0, 0, 1, 0);
 
 	glMatrixMode(GL_MODELVIEW);
+	
 	int i;
-	for(i = 0; i < MODEL_COUNT; i++)
+	glEnable(GL_STENCIL_TEST);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	for(i = 0; i < MODEL_COUNT; i++){
+		glStencilFunc(GL_ALWAYS, i + 1, -1);
 		drawPLY(objects[i]);
+	}
 
 	GLenum err;
 	while ((err = glGetError()) != GL_NO_ERROR)
 		printf("OpenGL Error: %d\n", err);
 
 	glFlush();
+}
+
+int pick(int x, int y){
+	unsigned int index;
+	int w = glutGet(GLUT_WINDOW_WIDTH);
+	glReadPixels(x, w - y, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
+	return (int) index;
 }
 
 void mouse(int button, int state, int x, int y){
@@ -94,6 +110,10 @@ void mouse(int button, int state, int x, int y){
 		isLeftButtonPressed = 1;
 		startX = x;
 		startY = y;
+
+		int objectID = pick(x, y);
+		if(objectID)
+			changeSelection(current, objectID - 1);
 	}
 	else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
 		isLeftButtonPressed = 0; //Utilizar isso em "MouseMotion".
@@ -139,16 +159,6 @@ void mouseMotion(int x, int y){
 
 void keyboard(unsigned char key, int x, int y){
 	switch(key){
-		case 'q':{ //Provisório. Alterar mais tarde.
-			int previous = current;
-			current = current + 1;
-			if(current == MODEL_COUNT)
-				current = 0;
-
-			changeSelection(previous, current);
-			glutPostRedisplay();
-			break;
-		}
 		case 'r':
 		case 's':
 		case 't':{
@@ -198,7 +208,7 @@ int main(int argc, char **argv){
 	}
 
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_STENCIL);
 	glutCreateWindow("CG 2018.2");
 	glutDisplayFunc(draw);
 	glutKeyboardFunc(keyboard);
