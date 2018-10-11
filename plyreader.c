@@ -74,6 +74,9 @@ PLY *openPLY(char *fileName){
 	myModel->center[1] = sumY / myModel->vertexCount;
 	myModel->center[2] = sumZ / myModel->vertexCount;
 	myModel->scaleFactor = 1.0;
+
+	myModel->translatedX = 0.0;
+	myModel->translatedZ = 0.0;
 	return myModel;
 }
 
@@ -86,6 +89,14 @@ void performScalePLY(PLY** object, float scaleFactor){
 	(*object)->scaleFactor = scaleFactor;
 }
 
+void performTranslationPLY(PLY** object, float dx, float dz){
+	printf("Translation: (%.2f, 0, %.2f)\n", dx, dz);
+	(*object)->translatedX += dx;
+	(*object)->translatedZ += dz;
+
+	printf("Current translation: (%.2f, %.2f)\n", (*object)->translatedX, (*object)->translatedZ);
+}
+
 void drawPLY(PLY* object){
 	glColor3f(object->color[0], object->color[1], object->color[2]);
 
@@ -93,13 +104,15 @@ void drawPLY(PLY* object){
 
 	glLoadIdentity();
 	
+	glTranslatef(object->translatedX, 0, object->translatedZ);
 	glTranslatef(object->center[0], object->center[1], object->center[2]);
 
 	glRotatef((GLfloat) object->angleX, 1.0, 0.0, 0.0);
 	glRotatef((GLfloat) object->angleY, 0.0, 1.0, 0.0);
 	glScalef(object->scaleFactor, object->scaleFactor, object->scaleFactor);
-	
+
 	glTranslatef(-object->center[0], -object->center[1], -object->center[2]);
+	glTranslatef(-object->translatedX, 0, -object->translatedZ);	
 	
 	glEnableClientState(GL_VERTEX_ARRAY);
 

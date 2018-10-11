@@ -11,6 +11,8 @@ typedef struct PLY{
 	float center[3]; //Coordenadas aproximadas do centro.
 	float color[3]; //R G B
 	float scaleFactor;
+	float translatedX, translatedZ;
+
 	GLfloat* vertex;
 	GLuint* faces;
 	GLfloat angleX, angleY; //Ângulo das rotações.
@@ -19,6 +21,7 @@ typedef struct PLY{
 void performRotationPLY(PLY** object, int dx, int dy);
 void changeColorPLY(PLY** object, float r, float g, float b);
 void performScalePLY(PLY** object, float scaleFactor);
+void performTranslationPLY(PLY** object, float dx, float dz);
 void drawPLY(PLY* object);
 
 PLY* openPLY(char *filename);

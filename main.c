@@ -18,10 +18,7 @@
 
 Objetivos:
 	1. Desenvolver um sistema de translação.
-	2. Selecionar com o mouse.
-	3. Mover todos os codigos para um só arquivo.
-
-http://professor.unisinos.br/ltonietto/jed/cgr/selection.pdf
+	2. Mover todos os codigos para um só arquivo.
 */
 
 PLY* objects[MODEL_COUNT];
@@ -41,6 +38,11 @@ void changeSelection(int prev, int curr){
 	changeColorPLY(&(objects[curr]), 1.0, 0.0, 0.0); //Alterando a cor para vermelho.	
 	current = curr;
 
+	glutPostRedisplay();
+}
+
+void performTranslation(int id, int dx, int dy){
+	performTranslationPLY(&(objects[id]), dx * 0.01, dy * 0.01);
 	glutPostRedisplay();
 }
 
@@ -66,7 +68,7 @@ void performScale(int id, int currentX, int currentY){
 }
 
 void draw(){
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glClearStencil(0);
 
 	float cameraX = distance * -sinf(theta*(M_PI/180)) * cosf((phi)*(M_PI/180));
@@ -75,13 +77,12 @@ void draw(){
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(10.0f, ratio, 0.1, 50);
+	gluPerspective(10.0f, ratio, 1.6, 10);
 	gluLookAt(cameraX, cameraY, cameraZ, 0, 0, 0, 0, 1, 0);
 
 	glMatrixMode(GL_MODELVIEW);
 	
 	int i;
-	glEnable(GL_STENCIL_TEST);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 	for(i = 0; i < MODEL_COUNT; i++){
 		glStencilFunc(GL_ALWAYS, i + 1, -1);
@@ -97,8 +98,8 @@ void draw(){
 
 int pick(int x, int y){
 	unsigned int index;
-	int w = glutGet(GLUT_WINDOW_WIDTH);
-	glReadPixels(x, w - y, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
+	int h = glutGet(GLUT_WINDOW_HEIGHT);
+	glReadPixels(x, h - y, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
 	return (int) index;
 }
 
@@ -112,7 +113,7 @@ void mouse(int button, int state, int x, int y){
 		startY = y;
 
 		int objectID = pick(x, y);
-		if(objectID)
+		if(objectID > 0 && objectID <= 2)
 			changeSelection(current, objectID - 1);
 	}
 	else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
@@ -148,6 +149,10 @@ void mouseMotion(int x, int y){
 				performScale(current, currentX, currentY);
 				break;
 			}
+			case 't':{
+				performTranslation(current, dx, dy);
+				break;
+			}
 		}
 	}
 	else if(isRightButtonPressed){
@@ -171,6 +176,9 @@ void keyboard(unsigned char key, int x, int y){
 void initScene(){
 	glMatrixMode(GL_MODELVIEW);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glEnable(GL_STENCIL_TEST);
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
 }
 
 void initObject(char *fileName, int position){
@@ -208,7 +216,7 @@ int main(int argc, char **argv){
 	}
 
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_STENCIL);
+	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_STENCIL | GLUT_DEPTH);
 	glutCreateWindow("CG 2018.2");
 	glutDisplayFunc(draw);
 	glutKeyboardFunc(keyboard);
