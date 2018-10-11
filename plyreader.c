@@ -83,7 +83,6 @@ void performRotationPLY(PLY** object, int dx, int dy){
 }
 
 void performScalePLY(PLY** object, float scaleFactor){
-	printf("Scale Factor = %f\n", scaleFactor);
 	(*object)->scaleFactor = scaleFactor;
 }
 
