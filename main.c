@@ -42,7 +42,7 @@ void changeSelection(int prev, int curr){
 }
 
 void performTranslation(int id, int dx, int dy){
-	performTranslationPLY(&(objects[id]), dx * 0.01, dy * 0.01);
+	performTranslationPLY(&(objects[id]), dx * 0.001, dy * 0.001);
 	glutPostRedisplay();
 }
 
@@ -78,6 +78,7 @@ void draw(){
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(10.0f, ratio, 0.1, 50);
+	glDepthRange(0.1, 50);
 	gluLookAt(cameraX, cameraY, cameraZ, 0, 0, 0, 0, 1, 0);
 
 	glMatrixMode(GL_MODELVIEW);
@@ -115,8 +116,6 @@ void mouse(int button, int state, int x, int y){
 		int objectID = pick(x, y);
 		if(objectID > 0 && objectID <= 2)
 			changeSelection(current, objectID - 1);
-		else
-			printf("ObjectID = %d\n", objectID);
 	}
 	else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
 		isLeftButtonPressed = 0; //Utilizar isso em "MouseMotion".

@@ -90,11 +90,8 @@ void performScalePLY(PLY** object, float scaleFactor){
 }
 
 void performTranslationPLY(PLY** object, float dx, float dz){
-	printf("Translation: (%.2f, 0, %.2f)\n", dx, dz);
 	(*object)->translatedX += dx;
 	(*object)->translatedZ += dz;
-
-	printf("Current translation: (%.2f, %.2f)\n", (*object)->translatedX, (*object)->translatedZ);
 }
 
 void drawPLY(PLY* object){
@@ -104,15 +101,15 @@ void drawPLY(PLY* object){
 
 	glLoadIdentity();
 	
-	glTranslatef(object->center[0], object->center[1], object->center[2]);
 	// glTranslatef(object->translatedX, 0, object->translatedZ);
+	glTranslatef(object->center[0], object->center[1], object->center[2]);
 
 	glRotatef((GLfloat) object->angleX, 1.0, 0.0, 0.0);
 	glRotatef((GLfloat) object->angleY, 0.0, 1.0, 0.0);
 	glScalef(object->scaleFactor, object->scaleFactor, object->scaleFactor);
 
 	glTranslatef(-object->center[0], -object->center[1], -object->center[2]);
-	// glTranslatef(-object->translatedX, 0, -object->translatedZ);	
+	glTranslatef(-object->translatedX, 0, -object->translatedZ);	
 	
 	glEnableClientState(GL_VERTEX_ARRAY);
 
